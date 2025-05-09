@@ -1,0 +1,41 @@
+package server;
+
+public class Partita {
+
+    private int[] giochi = {0, 0};
+    private int[] set = {0, 0};
+    private int[] punti = {0, 0};
+    public String[] etichettePunti = {"0", "15", "30", "40", "VANTAGGIO"};
+
+    public void punto(int giocatore) {
+        int avversario = 1 - giocatore;
+        if (punti[giocatore] == 3 && punti[avversario] < 3) {
+            giocoVinto(giocatore);
+        } else if (punti[giocatore] == 3 && punti[avversario] == 3) {
+            punti[giocatore] = 4;
+        } else if (punti[giocatore] == 4) {
+            giocoVinto(giocatore);
+        } else if (punti[giocatore] == 3 && punti[avversario] == 4) {
+            punti[avversario] = 3;
+        } else {
+            punti[giocatore]++;
+        }
+    }
+
+    public void giocoVinto(int giocatore) {
+        giochi[giocatore]++;
+        punti[0] = 0;
+        punti[1] = 0;
+        if (giochi[giocatore] >= 6 && giochi[giocatore] - giochi[1 - giocatore] >= 2) {
+            set[giocatore]++;
+            giochi[0] = 0;
+            giochi[1] = 0;
+        }
+    }
+
+    public String getPunteggio() {
+        return "Set: " + set[0] + "-" + set[1] +
+                " | Giochi: " + giochi[0] + "-" + giochi[1] +
+                " | Punti: " + etichettePunti[punti[0]] + "-" + etichettePunti[punti[1]];
+    }
+}
