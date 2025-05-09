@@ -1,5 +1,6 @@
 package server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import common.Message;
 import common.Message.Dati;
 
@@ -13,6 +14,7 @@ public class GestoreClient extends Thread {
     private ArrayList<GestoreClient> clientConnessi;
     private BufferedReader in;
     private PrintWriter out;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public GestoreClient(Socket socket, Partita partita, ArrayList<GestoreClient> clientConnessi) throws IOException {
         this.socket = socket;
@@ -25,61 +27,47 @@ public class GestoreClient extends Thread {
     @Override
     public void run() {
         try {
-            while (true) {
-                String input = in.readLine();
-                if (input == null) break; // la connessione è chiusa
+            String input;
+            while ((input = in.readLine()) != null) {
+                Message msg = mapper.readValue(input, Message.class);
 
-                // Deserializza il messaggio
-                try {
-                    Message msg = Message.fromJson(input);
-                    switch (msg.getTipo()) {
-                        case "aggiungi_punto":
-                            int giocatore = msg.getDati().getGiocatore();
-                            partita.punto(giocatore);
-                            inviaAGruppo("Punto assegnato al giocatore " + giocatore);
-                            break;
-                        case "richiedi_punteggio":
-                            inviaPunteggio();
-                            break;
-                        default:
-                            System.out.println("Tipo di messaggio non riconosciuto: " + msg.getTipo());
-                            break;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Errore nel processamento del messaggio: " + e.getMessage());
+                if ("imposta_nomi".equals(msg.getTipo())) {
+                    String nome1 = msg.getNomi().get(0);
+                    String nome2 = msg.getNomi().get(1);
+                    partita.setNomiGiocatori(nome1, nome2);
+                    inviaAGruppo("Nomi dei giocatori impostati: " + nome1 + " vs " + nome2);
+                } else if ("aggiungi_punto".equals(msg.getTipo())) {
+                    int giocatore = msg.getDati().getGiocatore();
+                    partita.punto(giocatore);
+                    inviaAGruppo("Punto assegnato a " + partita.getNomeGiocatore(giocatore));
+                } else if ("richiedi_punteggio".equals(msg.getTipo())) {
+                    inviaPunteggio();
                 }
             }
         } catch (IOException e) {
-            System.out.println("Errore durante la lettura del flusso: " + e.getMessage());
+            System.out.println("Errore: " + e.getMessage());
         } finally {
-            try {
-                if (socket != null && !socket.isClosed()) {
-                    socket.close();
-                }
-            } catch (IOException e) {
-                System.out.println("Errore durante la chiusura del socket: " + e.getMessage());
-            }
+            try { socket.close(); } catch (IOException ignored) {}
         }
     }
 
-    private void inviaPunteggio() throws Exception {
+    private void inviaPunteggio() throws IOException {
         Dati dati = new Dati();
         dati.setPunteggio(partita.getPunteggio());
         Message msg = new Message("aggiorna_punteggio", dati);
-        out.println(msg.toJson());
+        out.println(mapper.writeValueAsString(msg));
     }
 
-    private void inviaAGruppo(String messaggio) throws Exception {
+    private void inviaAGruppo(String messaggio) throws IOException {
         Dati dati = new Dati();
         dati.setPunteggio(partita.getPunteggio());
         dati.setMessaggio(messaggio);
         Message msg = new Message("aggiorna_punteggio", dati);
+        String json = mapper.writeValueAsString(msg);
+        System.out.println("[SERVER] " + partita.getPunteggio());
+
         for (GestoreClient gc : clientConnessi) {
-            try {
-                gc.out.println(msg.toJson());
-            } catch (Exception e) {
-                System.out.println("Errore nell'invio del messaggio al client: " + e.getMessage());
-            }
+            gc.out.println(json);
         }
     }
 }

@@ -1,25 +1,24 @@
 package common;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
 
-    @JsonProperty("tipo")
     private String tipo;
-
-    @JsonProperty("dati")
     private Dati dati;
+    private List<String> nomi; // Lista dei nomi dei giocatori
 
-    // Costruttore
-    public Message() {}
+    public Message() {
+    }
 
     public Message(String tipo, Dati dati) {
         this.tipo = tipo;
         this.dati = dati;
     }
 
-    // Getter e Setter
     public String getTipo() {
         return tipo;
     }
@@ -36,33 +35,28 @@ public class Message {
         this.dati = dati;
     }
 
-    // Metodo per serializzare a JSON
-    public String toJson() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(this);
+    public List<String> getNomi() {
+        return nomi;
     }
 
-    // Metodo per deserializzare da JSON
-    public static Message fromJson(String jsonStr) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(jsonStr, Message.class);
+    public void setNomi(List<String> nomi) {
+        this.nomi = nomi;
     }
 
-    // Classe interna per i dati
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Dati {
-        @JsonProperty("giocatore")
-        private int giocatore;
-        @JsonProperty("punteggio")
+        private Integer giocatore;
         private String punteggio;
-        @JsonProperty("messaggio")
         private String messaggio;
 
-        // Getter e Setter
-        public int getGiocatore() {
+        public Dati() {
+        }
+
+        public Integer getGiocatore() {
             return giocatore;
         }
 
-        public void setGiocatore(int giocatore) {
+        public void setGiocatore(Integer giocatore) {
             this.giocatore = giocatore;
         }
 
