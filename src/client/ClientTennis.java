@@ -45,8 +45,8 @@ public class ClientTennis {
         ricevitore.start();
 
         while (true) {
-            System.out.println("1. Aggiungi punto al giocatore 0");
-            System.out.println("2. Aggiungi punto al giocatore 1");
+            System.out.println("1. Aggiungi punto a: " + nome1 + ".");
+            System.out.println("2. Aggiungi punto a: " + nome2 + ".");
             System.out.println("3. Visualizza punteggio");
 
             int scelta = scanner.nextInt();

@@ -11,6 +11,7 @@ public class ServerTennis {
         ArrayList<GestoreClient> clientConnessi = new ArrayList<>();
 
         System.out.println("Server in ascolto...");
+        System.out.println("PUNTEGGIO PARTITA: ");
 
         while (true) {
             Socket socketClient = serverSocket.accept();
