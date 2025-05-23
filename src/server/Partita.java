@@ -2,10 +2,10 @@ package server;
 
 public class Partita {
     private String[] nomiGiocatori = {"Giocatore 0", "Giocatore 1"};
-    private int[] giochi = {0, 0};
+    private int[] game = {0, 0};
     private int[] set = {0, 0};
     private int[] punti = {0, 0};
-    public String[] etichettePunti = {"0", "15", "30", "40", "VANTAGGIO"};
+    public String[] etichettePunti = {"0", "15", "30", "40", "AD"};
 
     public synchronized void setNomiGiocatori(String nome1, String nome2) {
         nomiGiocatori[0] = nome1;
@@ -28,19 +28,19 @@ public class Partita {
     }
 
     private void giocoVinto(int giocatore) {
-        giochi[giocatore]++;
+        game[giocatore]++;
         punti[0] = 0;
         punti[1] = 0;
-        if (giochi[giocatore] >= 6 && giochi[giocatore] - giochi[1 - giocatore] >= 2) {
+        if (game[giocatore] >= 6 && game[giocatore] - game[1 - giocatore] >= 2) {
             set[giocatore]++;
-            giochi[0] = 0;
-            giochi[1] = 0;
+            game[0] = 0;
+            game[1] = 0;
         }
     }
 
     public synchronized String getPunteggio() {
         return "Set: " + set[0] + "-" + set[1] +
-                " | Giochi: " + giochi[0] + "-" + giochi[1] +
+                " | Game: " + game[0] + "-" + game[1] +
                 " | Punti: " + etichettePunti[punti[0]] + "-" + etichettePunti[punti[1]];
     }
 

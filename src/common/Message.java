@@ -9,7 +9,7 @@ public class Message {
 
     private String tipo;
     private Dati dati;
-    private List<String> nomi; // Lista dei nomi dei giocatori
+    private List<String> nomi;
 
     public Message() {
     }
