@@ -6,6 +6,7 @@ public class Partita {
     private int[] set = {0, 0};
     private int[] punti = {0, 0};
     public String[] etichettePunti = {"0", "15", "30", "40", "AD"};
+    private static final int SET_PER_VITTORIA = 2;
 
     public synchronized void setNomiGiocatori(String nome1, String nome2) {
         nomiGiocatori[0] = nome1;
@@ -13,6 +14,8 @@ public class Partita {
     }
 
     public synchronized void punto(int giocatore) {
+        if (partitaFinita()) return; // Non si può segnare dopo la fine
+
         int avversario = 1 - giocatore;
         if (punti[giocatore] == 3 && punti[avversario] < 3) {
             giocoVinto(giocatore);
@@ -46,5 +49,19 @@ public class Partita {
 
     public String getNomeGiocatore(int indice) {
         return nomiGiocatori[indice];
+    }
+
+    public synchronized boolean haVinto(int giocatore) {
+        return set[giocatore] == SET_PER_VITTORIA;
+    }
+
+    public synchronized boolean partitaFinita() {
+        return haVinto(0) || haVinto(1);
+    }
+
+    public synchronized int getVincitore() {
+        if (haVinto(0)) return 0;
+        if (haVinto(1)) return 1;
+        return -1;
     }
 }

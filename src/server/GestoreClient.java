@@ -31,17 +31,27 @@ public class GestoreClient extends Thread {
             while ((input = in.readLine()) != null) {
                 Message msg = mapper.readValue(input, Message.class);
 
-                if ("imposta_nomi".equals(msg.getTipo())) {
-                    String nome1 = msg.getNomi().get(0);
-                    String nome2 = msg.getNomi().get(1);
-                    partita.setNomiGiocatori(nome1, nome2);
-                    inviaAGruppo("Nomi dei giocatori impostati: " + nome1 + " vs " + nome2);
-                } else if ("aggiungi_punto".equals(msg.getTipo())) {
-                    int giocatore = msg.getDati().getGiocatore();
-                    partita.punto(giocatore);
-                    inviaAGruppo("Punto assegnato a " + partita.getNomeGiocatore(giocatore));
-                } else if ("richiedi_punteggio".equals(msg.getTipo())) {
-                    inviaPunteggio();
+                switch (msg.getTipo()) {
+                    case "imposta_nomi" -> {
+                        String nome1 = msg.getNomi().get(0);
+                        String nome2 = msg.getNomi().get(1);
+                        partita.setNomiGiocatori(nome1, nome2);
+                        inviaAGruppo("Nomi dei giocatori impostati: " + nome1 + " vs " + nome2);
+                    }
+
+                    case "aggiungi_punto" -> {
+                        int giocatore = msg.getDati().getGiocatore();
+                        partita.punto(giocatore);
+
+                        if (partita.partitaFinita()) {
+                            String vincitore = partita.getNomeGiocatore(partita.getVincitore());
+                            inviaAGruppo("HA VINTO " + vincitore + "!");
+                        } else {
+                            inviaAGruppo("Punto assegnato a " + partita.getNomeGiocatore(giocatore));
+                        }
+                    }
+
+                    case "richiedi_punteggio" -> inviaPunteggio();
                 }
             }
         } catch (IOException e) {
@@ -64,7 +74,9 @@ public class GestoreClient extends Thread {
         dati.setMessaggio(messaggio);
         Message msg = new Message("aggiorna_punteggio", dati);
         String json = mapper.writeValueAsString(msg);
+
         System.out.println("[SERVER] " + partita.getPunteggio());
+        System.out.println("[SERVER] " + messaggio);
 
         for (GestoreClient gc : clientConnessi) {
             gc.out.println(json);
